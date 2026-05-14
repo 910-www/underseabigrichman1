@@ -111,9 +111,9 @@ const cardPool = [
 { id: "shark", name: "🦈 冰凍鯊", desc: "敵方掉落垃圾，自身前進 4 格" },
 { id: "starfish", name: "⭐ 生命之星", desc: "犧牲自己 1 HP，換取恢復 1 HP" },
 { id: "whale", name: "🐋 鯨心膽跳", desc: "隊友直接恢復滿點生命值" },
-{ id: "turtle", name: "🐢 龜甲萬", desc: "免疫下次傷害，負重極高" },
-{ id: "octopus", name: "🐙 章魚墨客", desc: "使1名對手停頓或移動縮小" },
-{ id: "shell", name: "🐚 貝感欣慰", desc: "前進到最近垃圾格並清除" },
+{ id: "turtle", name: "🐢 龜甲萬", desc: "免疫下次傷害" },
+{ id: "octopus", name: "🐙 章魚墨客", desc: "使1名對手移動縮小" },
+{ id: "shell", name: "🐚 貝感欣慰", desc: "前進到最近垃圾格" },
 { id: "fish", name: "🐟 垃圾清道夫", desc: "吃掉小型垃圾來恢復體力" }
 ];
 
@@ -207,7 +207,7 @@ cellDiv.innerHTML = '<span class="cell-name">' + data.name + '</span>' +
 '<div class="cell-info">' + gText + '</div>' +
 '<div class="player-container"></div>';
 } else if (data.type === "event-cell") {
-cellDiv.innerHTML = '<span class="cell-name" style="color:#e9d5ff">✨事件格</span><div class="player-container"></div>';
+cellDiv.innerHTML = '<span class="cell-name" style="color:#e9d5ff">事件格!</span><div class="player-container"></div>';
 } else {
 cellDiv.innerHTML = '<span class="cell-name" style="color:#00ffcc">' + data.name + '</span><div class="player-container"></div>';
 }
