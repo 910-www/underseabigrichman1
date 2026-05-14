@@ -3,433 +3,333 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>underseabigrichman</title>
+<title>Undersea Big Rich Man - Large Grid</title>
 <style>
+:root {
+    --bg-color: #f4f1ea;
+    --text-main: #333333;
+    --text-sub: #7f7f7f;
+    --border-color: #d1d1d1;
+    --accent-red: #a63d40;
+    --accent-blue: #607d8b;
+    --accent-green: #849483;
+    --muji-tan: #e8e2d6;
+}
+
+h1 { font-size: 15px; margin-bottom: 2px; }
+
 * { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
-body { font-family: sans-serif; background: #0f2027; color: #fff; background: linear-gradient(to right, #203a43, #0f2027); min-height: 100vh; padding: 5px; display: flex; flex-direction: column; align-items: center; }
-h1 { color: #00d2ff; text-shadow: 0 0 10px rgba(0,210,255,0.5); font-size: 15px; text-align: center; margin-top: 2px; }
-.sub { font-size: 9px; color: #cbd5e0; text-align: center; margin-bottom: 4px; }
-#game-container { display: flex; flex-direction: column; gap: 6px; width: 100%; max-width: 480px; align-items: center; }
+body { 
+    font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; 
+    background-color: var(--bg-color); 
+    color: var(--text-main); 
+    padding: 4px; 
+    display: flex; flex-direction: column; align-items: center; 
+}
 
-/* 10x10 等比縮放網格 */
-.board { display: grid; grid-template-columns: repeat(10, 1fr); grid-template-rows: repeat(10, 1fr); gap: 2px; background: #001f3f; padding: 3px; border-radius: 6px; width: 94vw; height: 94vw; aspect-ratio: 1 / 1; }
-.cell { background: #1a365d; border: 1px solid #00d2ff; display: flex; flex-direction: column; justify-content: space-between; padding: 1px; position: relative; border-radius: 2px; overflow: hidden; min-width: 0; min-height: 0; }
-.cell.start-team0 { background: #742a2a; border-color: #ef4444; }
-.cell.start-team1 { background: #2a4365; border-color: #3b82f6; }
-.cell.start-team2 { background: #234e52; border-color: #10b981; }
-.cell.station { background: #2c5282; border-color: #00ffcc; }
-/* ⚡ 修正：新增事件格專屬視覺樣式，與普通海域區隔 */
-.cell.event-cell { background: #4a3780; border-color: #a855f7; font-weight: bold; }
+/* 遊戲地圖放大 */
+#game-container { 
+    width: 98vw; 
+    max-width: 500px; 
+    position: relative; 
+}
 
-.cell-name { font-size: 6px; font-weight: bold; color: #e2e8f0; white-space: nowrap; scale: 0.85; transform-origin: top left; display: block; overflow: hidden; text-overflow: ellipsis; }
-.cell-info { font-size: 5px; scale: 0.8; transform-origin: top left; white-space: nowrap; margin-top: -3px; color: #a0aec0; }
+/* 10x10 棋盤：重點在於格子尺寸感 */
+.board { 
+    display: grid; 
+    grid-template-columns: repeat(10, 1fr); 
+    grid-template-rows: repeat(10, 1fr); 
+    gap: 1.5px; /* 增加間隙讓格子更分明 */
+    background: var(--border-color); 
+    border: 2px solid var(--border-color);
+    width: 100%; 
+    aspect-ratio: 1 / 1; 
+    position: relative;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+}
 
-/* 棋子樣式 */
-.player-container { display: flex; gap: 1px; position: absolute; bottom: 1px; left: 1px; flex-wrap: wrap; width: 95%; }
-.player-token { width: 9px; height: 9px; border-radius: 50%; border: 0.5px solid #fff; display: flex; align-items: center; justify-content: center; color: white; font-size: 5px; font-weight: bold; }
-.t0-token { background: #ef4444; } .t1-token { background: #3b82f6; } .t2-token { background: #10b981; }
+.cell { 
+    background: #fff; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; /* 內容居中 */
+    align-items: center;
+    padding: 7px; 
+    position: relative; 
+}
 
-/* 操作台 */
-.panel { background: #1a202c; padding: 6px; border-radius: 6px; border: 1px solid #4a5568; width: 94vw; display: flex; flex-direction: column; gap: 4px; }
-.status-box { display: flex; flex-direction: column; gap: 3px; }
-.status { padding: 4px; border-radius: 4px; color: white; font-weight: bold; font-size: 9px; line-height: 1.2; text-align: left; }
-.t0-status { background: #9b2c2c; border: 1px solid #ef4444; }
-.t1-status { background: #2b6cb0; border: 1px solid #3b82f6; }
-.t2-status { background: #234e52; border: 1px solid #10b981; }
+/* 特殊格樣式維持，但飽和度稍微提高 */
+.cell.start-team0 { background: #fee2e2; }
+.cell.start-team1 { background: #e0f2fe; }
+.cell.start-team2 { background: #f0fdf4; }
+.cell.station { background: var(--muji-tan); }
+.cell.event-cell { background: #f5f3ff; }
 
-.action-group { background: #2d3748; padding: 4px; border-radius: 4px; display: flex; flex-direction: column; gap: 3px; }
-button { padding: 6px; font-size: 11px; cursor: pointer; background: #319795; color: white; border: none; border-radius: 4px; font-weight: bold; }
-button:disabled { background: #4a5568; color: #a0aec0; cursor: not-allowed; }
+.cell-name { 
+    font-size: 11px; 
+    font-weight: 700; 
+    position: absolute; 
+    top: 1px; 
+    left: 1px; 
+    color: var(--text-sub);
+    transform: scale(0.8);
+    transform-origin: top left;
+}
 
-/* 手牌清單（僅保留8種生物卡，移除事件卡） */
-.hand-container { display: flex; flex-direction: column; gap: 2px; max-height: 80px; overflow-y: auto; }
-.card-option { background: #4a5568; padding: 4px; border-radius: 3px; border: 1px solid #718096; display: flex; flex-direction: column; gap: 1px; font-size: 8px; text-align: left; }
-.card-option.selected { border-color: #f6e05e; background: #2d3748; }
-.card-name { font-weight: bold; color: #f6e05e; }
+/* 垃圾圖示變大 */
+.cell-info { 
+    font-size: 14px; /* 從 8px 大幅增加到 14px */
+    line-height: 1;
+}
 
-#log { border: 1px solid #4a5568; height: 45px; overflow-y: auto; font-size: 8px; padding: 2px; background: #1a202c; border-radius: 3px; color: #cbd5e0; }
-.highlight { color: #f6e05e; font-weight: bold; }
-#mobile-modal { display: none; background: #2d3748; border: 1px solid #00d2ff; padding: 6px; border-radius: 4px; flex-direction: column; gap: 4px; text-align: center; }
+/* 棋子也稍微放大 */
+.player-container { 
+    display: flex; 
+    gap: 1px; 
+    position: absolute; 
+    bottom: 1px; 
+    right: 1px; 
+    flex-wrap: wrap; 
+    justify-content: flex-end;
+    max-width: 90%; 
+}
+.player-token { 
+    width: 11px; height: 11px; border-radius: 50%; color: #fff; font-size: 7px; 
+    display: flex; align-items: center; justify-content: center; font-weight: bold;
+    border: 0.5px solid rgba(255,255,255,0.8);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.t0-token { background: var(--accent-red); }
+.t1-token { background: var(--accent-blue); }
+.t2-token { background: var(--accent-green); }
+
+/* 中間資訊區：維持比例但排版緊湊 */
+.center-info {
+    grid-column: 2 / 10;
+    grid-row: 2 / 10;
+    background: rgba(255, 255, 255, 0.95);
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    padding: 8% 4%;
+    justify-content: space-evenly;
+    text-align: center;
+}
+
+.center-turn { font-size: 14px; font-weight: 700; border-bottom: 1px solid #eee; padding-bottom: 4px; }
+.center-scores { display: flex; justify-content: space-around; width: 100%; }
+.score-item { display: flex; flex-direction: column; }
+.score-val { font-size: 18px; font-weight: 800; }
+.score-label { font-size: 9px; opacity: 0.7; }
+
+.center-hp { font-size: 10px; color: #555; background: #fafaf8; padding: 6px; border-radius: 3px; line-height: 1.4; border: 1px solid #f0f0f0; }
+
+/* 控制區 */
+.controls { width: 100%; margin-top: 10px; }
+.action-row { display: flex; gap: 6px; margin-bottom: 8px; }
+button { 
+    flex: 1; padding: 12px 2px; font-size: 13px; cursor: pointer; 
+    background: #333; color: #fff; border: none; border-radius: 4px;
+}
+button:disabled { background: #ddd; color: #999; }
+
+.hand-container { 
+    display: flex; gap: 8px; overflow-x: auto; padding: 5px 0;
+    -webkit-overflow-scrolling: touch;
+}
+.card-option { 
+    min-width: 118px; background: #fff; padding: 10px; border: 1px solid #ddd; 
+    border-radius: 4px; flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.card-option b { font-size: 12px; display: block; margin-bottom: 2px; }
+.card-option span { font-size: 9px; color: #777; }
+.card-option.selected { border: 2px solid #333; padding: 9px; }
+
+#dice-result { height: 20px; font-weight: bold; color: var(--accent-red); margin-bottom: 5px; text-align: center; font-size: 14px; }
 </style>
 </head>
 <body>
 
-<h1>underseabigrichman)</h1>
-<div class="sub">紅隊(P1,P2) | 藍隊(P3,P4) | 綠隊(P5,P6) </div>
-
 <div id="game-container">
-<div class="board" id="board"></div>
-<div class="panel">
-<h3 id="current-turn" style="margin:0; color:#f6e05e; font-size: 11px;">輪到：玩家 1 (紅隊)</h3>
+    <div class="board" id="board">
+        <div class="center-info">
+            <div id="current-turn" class="center-turn">P1</div>
+            
+            <div class="center-scores">
+                <div class="score-item" style="color:var(--accent-red)">
+                    <span id="t0-score" class="score-val">0</span>
+                    <span class="score-label">RED</span>
+                </div>
+                <div class="score-item" style="color:var(--accent-blue)">
+                    <span id="t1-score" class="score-val">0</span>
+                    <span class="score-label">BLUE</span>
+                </div>
+                <div class="score-item" style="color:var(--accent-green)">
+                    <span id="t2-score" class="score-val">0</span>
+                    <span class="score-label">GREEN</span>
+                </div>
+            </div>
 
-<div class="status-box">
-<div class="status t0-status">紅隊: 積分 <span id="t0-score">0</span> <br><span style="font-size:8px;font-weight:normal;" id="t0-inv">🎒 輪:0|網:0|袋:0|瓶/鉤:0|吸/煙:0</span></div>
-<div class="status t1-status">藍隊: 積分 <span id="t1-score">0</span> <br><span style="font-size:8px;font-weight:normal;" id="t1-inv">🎒 輪:0|網:0|袋:0|瓶/鉤:0|吸/煙:0</span></div>
-<div class="status t2-status">綠隊: 積分 <span id="t2-score">0</span> <br><span style="font-size:8px;font-weight:normal;" id="t2-inv">🎒 輪:0|網:0|袋:0|瓶/鉤:0|吸/煙:0</span></div>
-</div>
+            <div id="p-hp-info" class="center-hp">P1-P6 HP STATUS</div>
+            <h1>undersea big rich man</h1>
+            <div id="dice-result"></div>
+        </div>
+    </div>
 
-<div id="p-hp-info" style="font-size: 8px; color: #cbd5e0; background: #2d3748; padding: 2px; border-radius: 3px; text-align: center;"></div>
+    <div class="controls">
+        <div class="action-row">
+            <button id="roll-btn" onclick="rollDice()">🎲 擲骰移動</button>
+            <button id="card-btn" onclick="playCard()" disabled>🧬 發動卡片</button>
+            <button id="skip-card-btn" onclick="skipCard()" disabled>結束</button>
+        </div>
 
-<!-- 內置輔助交互區：處理事件格觸發的猜拳與聲納方向 -->
-<div id="mobile-modal">
-<div id="modal-msg" style="font-size:9px;"></div>
-<div style="display:flex; gap:4px; justify-content:center; margin-top:2px;">
-<button id="modal-btn1" style="padding:4px;"></button>
-<button id="modal-btn2" style="padding:4px;"></button>
-</div>
-</div>
-
-<div class="action-group">
-<button id="roll-btn" onclick="rollDice()">🎲 第一步：擲骰子移動</button>
-<div id="dice-result" style="font-size: 10px; font-weight: bold; text-align: center; color: #4fd1c5;"></div>
-</div>
-
-<div class="action-group">
-<div style="font-size: 9px; font-weight: bold; color: #cbd5e0;">第二步：主動派遣生物技能</div>
-<div class="hand-container" id="hand-cards"></div>
-<div style="display:flex; gap:4px;">
-<button id="card-btn" onclick="playCard()" style="flex:1;" disabled>🧬 發動卡牌</button>
-<button id="skip-card-btn" onclick="skipCard()" style="background:#4a5568; flex:1;" disabled>⏭️ 保留結束</button>
-</div>
-</div>
-<div id="log">遊戲開始！地圖已均勻布設 8 個隨機觸發的事件格。</div>
-</div>
+        <div class="hand-container" id="hand-cards"></div>
+    </div>
 </div>
 
 <script>
+// --- 數據結構 (維持 36 格路徑) ---
 const garbageTypes = [
-{ key: "tire", name: "輪胎", score: 5, icon: "🛞" },
-{ key: "net", name: "漁網", score: 4, icon: "🕸️" },
-{ key: "bag", name: "塑膠袋", score: 3, icon: "🛍️" },
-{ key: "bottle", name: "寶特瓶/魚鉤", score: 2, icon: "🍾" },
-{ key: "straw", name: "吸管/煙蒂", score: 1, icon: "🥤" }
+    { key: "tire", name: "輪胎", score: 5, icon: "🛞" },
+    { key: "net", name: "漁網", score: 4, icon: "🕸️" },
+    { key: "bag", name: "塑膠袋", score: 3, icon: "🛍️" },
+    { key: "bottle", name: "寶特瓶", score: 2, icon: "🍾" },
+    { key: "straw", name: "吸管", score: 1, icon: "🥤" }
 ];
 
-// 🧬 修正：手牌卡池僅保留 8 種魔法生物技能，事件改由格子觸發
 const cardPool = [
-{ id: "shrimp", name: "🦐 爆炸蝦", desc: "無視骰子點數直接向前游 2 格" },
-{ id: "shark", name: "🦈 冰凍鯊", desc: "敵方掉落垃圾，自身前進 4 格" },
-{ id: "starfish", name: "⭐ 生命之星", desc: "犧牲自己 1 HP，換取恢復 1 HP" },
-{ id: "whale", name: "🐋 鯨心膽跳", desc: "隊友直接恢復滿點生命值" },
-{ id: "turtle", name: "🐢 龜甲萬", desc: "免疫下次傷害" },
-{ id: "octopus", name: "🐙 章魚墨客", desc: "使1名對手移動縮小" },
-{ id: "shell", name: "🐚 貝感欣慰", desc: "前進到最近垃圾格" },
-{ id: "fish", name: "🐟 垃圾清道夫", desc: "吃掉小型垃圾來恢復體力" }
+    { id: "shrimp", name: "🦐 爆炸蝦", desc: "前進 2 格" },
+    { id: "shark", name: "🦈 冰凍鯊", desc: "前進 4 格" },
+    { id: "starfish", name: "⭐ 生命之星", desc: "隊友回 HP" },
+    { id: "whale", name: "🐋 鯨心膽跳", desc: "全隊滿 HP" },
+    { id: "turtle", name: "🐢 龜甲萬", desc: "免疫傷害" },
+    { id: "octopus", name: "🐙 章魚墨客", desc: "敵移動減半" },
+    { id: "shell", name: "🐚 貝感欣慰", desc: "飛向垃圾格" },
+    { id: "fish", name: "🐟 清道夫", desc: "吃垃圾回 HP" }
 ];
 
-// ⚡ 修正：建立獨立的事件庫，供事件格踩到時隨機抽選
-const eventPool = [
-{ id: "evt_whale", name: "🐋 擱淺鯨魚" },
-{ id: "evt_straw", name: "🐢 海龜吸管" },
-{ id: "evt_oil", name: "🛢️ 海底漏油" },
-{ id: "evt_net", name: "🕸️ 纏繞漁網" },
-{ id: "evt_sonar", name: "📡 聲納干擾" },
-{ id: "evt_earthquake", name: "🌋 深海地震" }
-];
-
-// ⚡ 修正：地圖均勻配置 8 個事件格（指定位置：3, 7, 12, 16, 21, 25, 30, 34）
-const eventPositions = [3, 7, 12, 16, 21, 25, 30, 34];
 const mapConfig = [];
+const eventPos = [3, 7, 12, 16, 21, 25, 30, 34];
 for (let i = 0; i < 36; i++) {
-if (i === 0) { mapConfig.push({ name: "紅起點", type: "start-team0" }); }
-else if (i === 9) { mapConfig.push({ name: "藍起點", type: "start-team1" }); }
-else if (i === 18) { mapConfig.push({ name: "綠起點", type: "start-team2" }); }
-else if (i === 5 || i === 14 || i === 23 || i === 32) { mapConfig.push({ name: "恢復站", type: "station" }); }
-else if (eventPositions.indexOf(i) !== -1) {
-// 部署為隨機觸發的事件格
-mapConfig.push({ name: "事件格", type: "event-cell" });
-} else {
-let randType = Math.random() > 0.3 ? garbageTypes[Math.floor(Math.random() * garbageTypes.length)] : null;
-mapConfig.push({
-name: "海域-" + i,
-type: "ocean",
-garbage: randType ? { key: randType.key, name: randType.name, score: randType.score, icon: randType.icon } : null
-});
-}
+    if (i === 0) mapConfig.push({ name: "R-START", type: "start-team0" });
+    else if (i === 9) mapConfig.push({ name: "B-START", type: "start-team1" });
+    else if (i === 18) mapConfig.push({ name: "G-START", type: "start-team2" });
+    else if ([5, 14, 23, 32].includes(i)) mapConfig.push({ name: "回收站", type: "station" });
+    else if (eventPos.includes(i)) mapConfig.push({ name: "事件", type: "event-cell" });
+    else {
+        let randG = Math.random() > 0.4 ? garbageTypes[Math.floor(Math.random()*5)] : null;
+        mapConfig.push({ name: i, type: "ocean", garbage: randG });
+    }
 }
 
+// 10x10 邊緣映射
 const gridMapping = [];
 for (let col = 0; col < 10; col++) gridMapping.push(col);
 for (let row = 1; row <= 8; row++) {
-for (let col = 0; col < 10; col++) {
-if (col === 0) gridMapping.push(36 - row);
-else if (col === 9) gridMapping.push(9 + row);
-else gridMapping.push(-1);
-}
+    for (let col = 0; col < 10; col++) {
+        if (col === 0) gridMapping.push(36 - row);
+        else if (col === 9) gridMapping.push(9 + row);
+        else gridMapping.push(-1);
+    }
 }
 for (let col = 0; col < 10; col++) gridMapping.push(27 - col);
 
 const players = [
-{ id: 1, name: "P1", team: 0, hp: 5, position: 0, trap: false },
-{ id: 2, name: "P2", team: 0, hp: 5, position: 0, trap: false },
-{ id: 3, name: "P3", team: 1, hp: 5, position: 9, trap: false },
-{ id: 4, name: "P4", team: 1, hp: 5, position: 9, trap: false },
-{ id: 5, name: "P5", team: 2, hp: 5, position: 18, trap: false },
-{ id: 6, name: "P6", team: 2, hp: 5, position: 18, trap: false }
+    { id: 1, team: 0, hp: 5, position: 0 }, { id: 2, team: 0, hp: 5, position: 0 },
+    { id: 3, team: 1, hp: 5, position: 9 }, { id: 4, team: 1, hp: 5, position: 9 },
+    { id: 5, team: 2, hp: 5, position: 18 }, { id: 6, team: 2, hp: 5, position: 18 }
 ];
 
-const teams = [
-{ score: 0, inventory: { tire: 0, net: 0, bag: 0, bottle: 0, straw: 0 }, hand: [] },
-{ score: 0, inventory: { tire: 0, net: 0, bag: 0, bottle: 0, straw: 0 }, hand: [] },
-{ score: 0, inventory: { tire: 0, net: 0, bag: 0, bottle: 0, straw: 0 }, hand: [] }
-];
-
+const teams = [{score:0, hand:[]}, {score:0, hand:[]}, {score:0, hand:[]}];
 let currentTurnPlayer = 0;
 let selectedCardIndex = null;
-let globalMaxSteps = 3;
-let sonarTurns = 0;
 
-teams.forEach(function(t) { for (let i = 0; i < 4; i++) t.hand.push(getRandomCard()); });
-function getRandomCard() { return cardPool[Math.floor(Math.random() * cardPool.length)]; }
+teams.forEach(t => { for(let i=0; i<4; i++) t.hand.push(cardPool[Math.floor(Math.random()*8)]); });
 
 function initBoard() {
-const board = document.getElementById("board");
-board.innerHTML = "";
-gridMapping.forEach(function(mapIndex) {
-const cellDiv = document.createElement("div");
-if (mapIndex === -1) { cellDiv.style.visibility = "hidden"; }
-else {
-const data = mapConfig[mapIndex];
-cellDiv.className = "cell " + data.type;
-cellDiv.id = "cell-" + mapIndex;
-renderCellContent(cellDiv, data);
-}
-board.appendChild(cellDiv);
-});
-renderHand();
-updateUI();
-}
-
-function renderCellContent(cellDiv, data) {
-if (data.type === "ocean") {
-let gText = data.garbage ? data.garbage.icon + data.garbage.name : "乾淨";
-cellDiv.innerHTML = '<span class="cell-name">' + data.name + '</span>' +
-'<div class="cell-info">' + gText + '</div>' +
-'<div class="player-container"></div>';
-} else if (data.type === "event-cell") {
-cellDiv.innerHTML = '<span class="cell-name" style="color:#e9d5ff">事件格!</span><div class="player-container"></div>';
-} else {
-cellDiv.innerHTML = '<span class="cell-name" style="color:#00ffcc">' + data.name + '</span><div class="player-container"></div>';
-}
-}
-
-function renderHand() {
-const handBox = document.getElementById("hand-cards");
-handBox.innerHTML = "";
-selectedCardIndex = null;
-document.getElementById("card-btn").disabled = true;
-
-const currentTeamIdx = players[currentTurnPlayer].team;
-const currentHand = teams[currentTeamIdx].hand;
-
-currentHand.forEach(function(card, idx) {
-const cardDiv = document.createElement("div");
-cardDiv.className = "card-option";
-cardDiv.onclick = function() {
-document.querySelectorAll('.card-option').forEach(function(el) { el.classList.remove('selected'); });
-cardDiv.classList.add('selected');
-selectedCardIndex = idx;
-if (document.getElementById("roll-btn").disabled) {
-document.getElementById("card-btn").disabled = false;
-}
-};
-cardDiv.innerHTML = '<div><span class="card-name">' + card.name + '</span></div><div style="color:#cbd5e0; font-size:7px;">' + card.desc + '</div>';
-handBox.appendChild(cardDiv);
-});
+    const board = document.getElementById("board");
+    const center = board.querySelector(".center-info");
+    board.innerHTML = ""; board.appendChild(center);
+    gridMapping.forEach(m => {
+        if(m === -1) return;
+        const d = mapConfig[m];
+        const cell = document.createElement("div");
+        cell.className = "cell " + d.type; cell.id = "cell-" + m;
+        let gIcon = d.garbage ? d.garbage.icon : "";
+        cell.innerHTML = `<span class="cell-name">${d.name}</span><div class="cell-info">${gIcon}</div><div class="player-container"></div>`;
+        board.appendChild(cell);
+    });
+    renderHand(); updateUI();
 }
 
 function updateUI() {
-document.querySelectorAll('.player-container').forEach(function(el) { el.innerHTML = ''; });
-players.forEach(function(p) {
-const container = document.querySelector("#cell-" + p.position + " .player-container");
-if (container) {
-const token = document.createElement("div");
-token.className = "player-token t" + p.team + "-token";
-token.innerText = "P" + p.id;
-container.appendChild(token);
-}
-});
-
-for (let i = 0; i < 3; i++) {
-document.getElementById("t" + i + "-score").innerText = teams[i].score;
-let inv = teams[i].inventory;
-document.getElementById("t" + i + "-inv").innerText = "🎒 輪:" + inv.tire + " | 網:" + inv.net + " | 袋:" + inv.bag + " | 瓶:" + inv.bottle + " | 吸:" + inv.straw;
-}
-
-let hpStr = "";
-players.forEach(function(p) { hpStr += "P" + p.id + ":" + p.hp + (p.trap ? '🕸️' : '') + " | "; });
-document.getElementById("p-hp-info").innerText = hpStr.slice(0, -3);
-
-const teamNames = ["紅隊", "藍隊", "綠隊"];
-const p = players[currentTurnPlayer];
-document.getElementById("current-turn").innerText = "輪到：" + p.name + " (" + teamNames[p.team] + ")";
+    document.querySelectorAll('.player-container').forEach(el => el.innerHTML = '');
+    players.forEach(p => {
+        const container = document.querySelector("#cell-" + p.position + " .player-container");
+        if (container) {
+            const t = document.createElement("div");
+            t.className = `player-token t${p.team}-token`; t.innerText = p.id;
+            container.appendChild(t);
+        }
+    });
+    for(let i=0; i<3; i++) document.getElementById(`t${i}-score`).innerText = teams[i].score;
+    let hpStr = "";
+    players.forEach((p, idx) => {
+        hpStr += `P${p.id}:${p.hp} ${(idx+1)%3==0 ? '<br>' : '| '}`;
+    });
+    document.getElementById("p-hp-info").innerHTML = hpStr;
+    const p = players[currentTurnPlayer];
+    const teamColors = ["var(--accent-red)", "var(--accent-blue)", "var(--accent-green)"];
+    document.getElementById("current-turn").innerText = `PLAYER ${p.id} 回合`;
+    document.getElementById("current-turn").style.color = teamColors[p.team];
 }
 
-function logMessage(msg) {
-const logDiv = document.getElementById("log");
-logDiv.innerHTML += "<br>" + msg;
-logDiv.scrollTop = logDiv.scrollHeight;
-}
-
-function openMobileModal(msg, btn1Text, btn2Text, callback) {
-const modal = document.getElementById("mobile-modal");
-const modalMsg = document.getElementById("modal-msg");
-const okBtn = document.getElementById("modal-btn1");
-const cancelBtn = document.getElementById("modal-btn2");
-
-modalMsg.innerText = msg;
-okBtn.innerText = btn1Text;
-if(btn2Text) { cancelBtn.innerText = btn2Text; cancelBtn.style.display = "inline-block"; }
-else { cancelBtn.style.display = "none"; }
-
-modal.style.display = "flex";
-okBtn.onclick = function() { modal.style.display = "none"; callback(true); };
-cancelBtn.onclick = function() { modal.style.display = "none"; callback(false); };
+function renderHand() {
+    const handBox = document.getElementById("hand-cards");
+    handBox.innerHTML = ""; selectedCardIndex = null;
+    teams[players[currentTurnPlayer].team].hand.forEach((card, idx) => {
+        const c = document.createElement("div");
+        c.className = "card-option";
+        c.onclick = () => {
+            document.querySelectorAll('.card-option').forEach(el => el.classList.remove('selected'));
+            c.classList.add('selected'); selectedCardIndex = idx;
+            if(document.getElementById("roll-btn").disabled) document.getElementById("card-btn").disabled = false;
+        };
+        c.innerHTML = `<b>${card.name}</b><span>${card.desc}</span>`;
+        handBox.appendChild(c);
+    });
 }
 
 function rollDice() {
-const p = players[currentTurnPlayer];
-if (p.trap) {
-logMessage("⚠️ " + p.name + " 被漁網困住，本輪留在原地解開漁網！");
-p.trap = false;
-document.getElementById("roll-btn").disabled = true;
-document.getElementById("skip-card-btn").disabled = false;
-if (selectedCardIndex !== null) document.getElementById("card-btn").disabled = false;
-return;
-}
-
-document.getElementById("roll-btn").disabled = true;
-const dice = Math.floor(Math.random() * globalMaxSteps) + 1;
-
-if (sonarTurns > 0) {
-const enemyId = (currentTurnPlayer + 1) % players.length;
-openMobileModal("【聲納干擾】請 " + players[enemyId].name + " 控向：", "前進 " + dice, "後退 " + dice, function(isForward) {
-executeMove(isForward ? dice : -dice);
-});
-} else {
-executeMove(dice);
-}
-}
-
-function executeMove(steps) {
-const p = players[currentTurnPlayer];
-document.getElementById("dice-result").innerHTML = '🎲 步數：<span class="highlight">' + steps + '</span> 步';
-p.position = (p.position + steps + mapConfig.length) % mapConfig.length;
-logMessage(p.name + " 移動抵達 【" + mapConfig[p.position].name + "】");
-
-handleGridEvent(p);
-document.getElementById("skip-card-btn").disabled = false;
-if (selectedCardIndex !== null) document.getElementById("card-btn").disabled = false;
-}
-
-function handleGridEvent(player) {
-const cell = mapConfig[player.position];
-const teamData = teams[player.team];
-
-if (cell.type === "ocean") {
-if (cell.garbage) {
-let g = cell.garbage;
-teamData.inventory[g.key] += 1;
-logMessage(player.name + ' 拾取 [' + g.icon + g.name + '] 放入背包 (未計分)');
-cell.garbage = null;
-renderCellContent(document.getElementById("cell-" + player.position), cell);
-}
-} else if (cell.type === "station") {
-let inv = teamData.inventory;
-let totalGained = (inv.tire * 5) + (inv.net * 4) + (inv.bag * 3) + (inv.bottle * 2) + (inv.straw * 1);
-if (totalGained > 0) {
-teamData.score += totalGained;
-logMessage('✨ ' + player.name + ' 抵達恢復站卸載！陣營分數 <span class="highlight">+' + totalGained + '</span> 分！');
-inv.tire = 0; inv.net = 0; inv.bag = 0; inv.bottle = 0; inv.straw = 0;
-}
-} else if (cell.type === "event-cell") {
-// ⚡ 修正：踩到事件格時，立刻隨機抽選事件執行
-triggerCellEvent(player);
-}
-updateUI();
-}
-
-// ⚡ 修正：專門處理事件格內建邏輯的狀態機函數
-function triggerCellEvent(player) {
-const tIndex = player.team;
-const nextT = (tIndex + 1) % 3;
-const teamNames = ["紅隊", "藍隊", "綠隊"];
-const evt = eventPool[Math.floor(Math.random() * eventPool.length)];
-
-logMessage(`⚠️ ${player.name} 觸發了事件格！隨機翻開：【${evt.name}】`);
-
-if (evt.id === "evt_whale") {
-openMobileModal("【🐋 擱淺鯨魚】現實猜拳後點選獲勝方：", teamNames[tIndex] + " 獲勝", teamNames[nextT] + " 獲勝", function(win) {
-if (win) { teams[tIndex].score += 2; teams[nextT].score += 1; }
-else { teams[tIndex].score += 1; teams[nextT].score += 2; }
-updateUI();
-});
-} else if (evt.id === "evt_straw") {
-teams[tIndex].score += 1;
-const targetP = players.find(function(pl) { return pl.team === nextT; });
-if(targetP) {
-targetP.position = (targetP.position + 1) % mapConfig.length;
-logMessage(`[事件] 幫助海龜，${targetP.name} 前進 1 格，自己陣營獲得 1 積分。`);
-handleGridEvent(targetP);
-}
-} else if (evt.id === "evt_oil") {
-players.forEach(function(pl) { pl.hp = Math.max(1, pl.hp - 1); });
-globalMaxSteps = 2;
-openMobileModal("【🛢️ 海底漏油】全員失去 1 HP，下一輪全場骰子上限壓縮為 2 步。", "收到", null, function() {});
-} else if (evt.id === "evt_net") {
-let leadP = players[0];
-players.forEach(function(pl) { if (pl.position > leadP.position) leadP = pl; });
-leadP.trap = true;
-logMessage(`[事件] 尼龍網纏繞！場上最前方的 ${leadP.name} 下輪將被困無法移動。`);
-} else if (evt.id === "evt_sonar") {
-sonarTurns = 6;
-openMobileModal("【📡 聲納干擾】全體生物迷失方向，移動由對手控向持續兩回合。", "面臨危機", null, function() {});
-} else if (evt.id === "evt_earthquake") {
-openMobileModal("【🌋 深海地震】板塊隨機變動，全體玩家位置大風吹順時針對調！", "引發巨變", null, function() {
-const posBackup = players.map(function(pl) { return pl.position; });
-for (let i = 0; i < players.length; i++) { players[i].position = posBackup[(i + 1) % players.length]; }
-players.forEach(function(pl) { handleGridEvent(pl); });
-});
-}
+    document.getElementById("roll-btn").disabled = true;
+    const steps = Math.floor(Math.random() * 3) + 1;
+    document.getElementById("dice-result").innerText = `骰子：${steps} 步`;
+    const p = players[currentTurnPlayer];
+    p.position = (p.position + steps) % 36;
+    const cell = mapConfig[p.position];
+    if(cell.garbage) { 
+        teams[p.team].score += cell.garbage.score; 
+        cell.garbage = null; 
+        document.querySelector(`#cell-${p.position} .cell-info`).innerText = ""; 
+    }
+    document.getElementById("skip-card-btn").disabled = false;
+    updateUI();
 }
 
 function playCard() {
-if (selectedCardIndex === null) return;
-const p = players[currentTurnPlayer];
-const tIndex = p.team;
-const card = teams[tIndex].hand[selectedCardIndex];
-
-logMessage("🎴 " + p.name + " 派遣生物 【" + card.name + "】！");
-
-if (card.id === "shrimp") {
-p.position = (p.position + 2) % mapConfig.length;
-logMessage("爆炸蝦游動！" + p.name + " 額外移動 2 格。");
-handleGridEvent(p);
-} else {
-logMessage("生物魔法發動。");
+    if(selectedCardIndex === null) return;
+    const p = players[currentTurnPlayer];
+    teams[p.team].hand[selectedCardIndex] = cardPool[Math.floor(Math.random()*8)];
+    endTurn();
 }
-
-teams[tIndex].hand[selectedCardIndex] = getRandomCard();
-endTurn();
-}
-
-function skipCard() {
-logMessage(players[currentTurnPlayer].name + " 選擇保留生物卡。");
-endTurn();
-}
-
+function skipCard() { endTurn(); }
 function endTurn() {
-if (sonarTurns > 0) sonarTurns--;
-if (currentTurnPlayer === players.length - 1 && globalMaxSteps === 2) globalMaxSteps = 3;
-
-currentTurnPlayer = (currentTurnPlayer + 1) % players.length;
-document.getElementById("roll-btn").disabled = false;
-document.getElementById("card-btn").disabled = true;
-document.getElementById("skip-card-btn").disabled = true;
-document.getElementById("dice-result").innerText = "";
-
-renderHand();
-updateUI();
+    currentTurnPlayer = (currentTurnPlayer + 1) % 6;
+    document.getElementById("roll-btn").disabled = false;
+    document.getElementById("card-btn").disabled = true;
+    document.getElementById("skip-card-btn").disabled = true;
+    document.getElementById("dice-result").innerText = "";
+    renderHand(); updateUI();
 }
 
 initBoard();
